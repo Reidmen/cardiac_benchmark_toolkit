@@ -1,7 +1,9 @@
 # Cardiac Benchmark Toolkit
 
 This repository contains basic scripts that allow you to reproduce the mesh
-as well as the fibers in the cardiac mechanics benchmark.
+as well as the fibers in the cardiac mechanics benchmark in dolfin (legacy). 
+
+*For the [dolfinx](https://github.com/FEniCS/dolfinx) implementation of the tools, [check here](https://github.com/Reidmen/cardiac_benchmark_toolkitx)*
 
 ## Installation
 
