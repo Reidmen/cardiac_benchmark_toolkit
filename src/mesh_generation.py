@@ -1,12 +1,19 @@
 import subprocess
 import meshio
 from pathlib import Path
+import argparse
+import sys
 from dolfin import XDMFFile, Mesh, MeshFunction, MeshValueCollection
 
-from data import MARKERS, DEFAULTS
+from src.data import MARKERS, DEFAULTS
 
 
-def ellipsoid(hc: float, defaults: DEFAULTS, markers: MARKERS, path: str = "./meshes/"):
+def ellipsoid_mesh(
+    hc: float,
+    defaults: DEFAULTS = DEFAULTS(),
+    markers: MARKERS = MARKERS(),
+    path: str = "./meshes/",
+):
     """Create truncated ellipsoid mesh of [Lan+15]_.
 
     The geo code was adapted from https://bitbucket.org/peppu/mechbench/, one
@@ -176,3 +183,40 @@ def ellipsoid(hc: float, defaults: DEFAULTS, markers: MARKERS, path: str = "./me
     ]:
         Path(pth_msh).unlink()
         Path(pth_bnd).unlink()
+
+
+def get_parser():
+    """Get arguments parser.
+
+    Returns:
+        parser
+    """
+    parser = argparse.ArgumentParser(
+        description="""
+        Generate ellipsoid mesh, with optional path and element size.
+        """,
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "-path",
+        "--path_to_save",
+        type=str,
+        default="./meshes/",
+        help="Path where meshes are written",
+    )
+    parser.add_argument(
+        "-size",
+        "--element_size",
+        metavar="hc",
+        type=float,
+        default=0.005,
+        help="Truncated ellipsoid mesh with characteristic mesh size",
+    )
+    return parser
+
+
+if __name__ == "__main__":
+    args: argparse.Namespace = get_parser().parse_args()
+
+    if len(sys.argv) > 1:
+        ellipsoid_mesh(args.element_size, path=args.path_to_save)
