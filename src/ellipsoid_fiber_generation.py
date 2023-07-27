@@ -33,6 +33,7 @@ class MARKERS:
 
 @dataclass(frozen=True)
 class DEFAULTS:
+    QUOTA_BASE = 1e-2
     R_SHORT_ENDO = 2.5e-2
     R_SHORT_EPI = 3.5e-2
     R_LONG_ENDO = 9.0e-2
