@@ -14,10 +14,7 @@ def ellipsoid_mesh(
     markers: MARKERS = MARKERS(),
     path: str = "./meshes/",
 ):
-    """Create truncated ellipsoid mesh of [Lan+15]_.
-
-    The geo code was adapted from https://bitbucket.org/peppu/mechbench/, one
-    of the participants of the benchmark.
+    """Create truncated ellipsoid mesh with physiological dimensions.
 
     Surface IDs:
     1  endocardium
