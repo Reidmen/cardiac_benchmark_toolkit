@@ -24,7 +24,7 @@ from dolfin import (
 )
 from dolfin import dot, dx, grad, interpolate, solve
 
-from src.data import MARKERS, DEFAULTS
+from cardiac_benchmark_toolkit.data import MARKERS, DEFAULTS
 
 
 @dataclass(frozen=True)

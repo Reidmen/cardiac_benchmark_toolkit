@@ -5,7 +5,7 @@ import argparse
 import sys
 from dolfin import XDMFFile, Mesh, MeshFunction, MeshValueCollection
 
-from src.data import MARKERS, DEFAULTS
+from cardiac_benchmark_toolkit.data import MARKERS, DEFAULTS
 
 
 def ellipsoid_mesh(
