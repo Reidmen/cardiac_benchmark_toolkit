@@ -24,21 +24,7 @@ from dolfin import (
 )
 from dolfin import dot, dx, grad, interpolate, solve
 
-
-@dataclass(frozen=True)
-class MARKERS:
-    ENDOCARDIUM = 1
-    EPICARDIUM = 2
-
-
-@dataclass(frozen=True)
-class DEFAULTS:
-    R_SHORT_ENDO = 2.5e-2
-    R_SHORT_EPI = 3.5e-2
-    R_LONG_ENDO = 9.0e-2
-    R_LONG_EPI = 9.7e-2
-    FIBER_ALPHA_ENDO = -60.0
-    FIBER_ALPHA_EPI = +60.0
+from cardiac_benchmark_toolkit.data import MARKERS, DEFAULTS
 
 
 @dataclass(frozen=True)
