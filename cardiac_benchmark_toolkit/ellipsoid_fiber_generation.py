@@ -1,30 +1,28 @@
+import argparse
 from dataclasses import dataclass
 from enum import Enum
 import pathlib
 from typing import Literal
 
-import argparse
-
 import numpy as np
 
+from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 from dolfin import (
     Constant,
     DirichletBC,
+    File,
     Function,
     FunctionSpace,
+    HDF5File,
     Mesh,
     MeshFunction,
     TestFunction,
     TrialFunction,
     UserExpression,
     VectorFunctionSpace,
-    HDF5File,
     XDMFFile,
-    File,
 )
 from dolfin import dot, dx, grad, interpolate, solve
-
-from cardiac_benchmark_toolkit.data import MARKERS, DEFAULTS
 
 
 @dataclass(frozen=True)

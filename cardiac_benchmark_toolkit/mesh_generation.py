@@ -1,11 +1,12 @@
-import subprocess
-import meshio
-from pathlib import Path
 import argparse
+from pathlib import Path
+import subprocess
 import sys
-from dolfin import XDMFFile, Mesh, MeshFunction, MeshValueCollection
 
-from cardiac_benchmark_toolkit.data import MARKERS, DEFAULTS
+import meshio
+
+from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
+from dolfin import Mesh, MeshFunction, MeshValueCollection, XDMFFile
 
 
 def ellipsoid_mesh(
