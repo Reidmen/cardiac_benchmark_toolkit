@@ -1,3 +1,5 @@
+![MIT](https://img.shields.io/badge/License-MIT-green)
+![Black](https://img.shields.io/badge/Style-Black-black)
 # Cardiac Benchmark Toolkit
 
 This repository contains basic scripts that allow you to reproduce the mesh
@@ -23,10 +25,13 @@ docker exec -ti dolfin-stable /bin/bash -l
 **Note** docker image is cortesy of *Simula Lab*.
 
 ## Quickstart
-Given your tagged mesh located in `./meshes/ellipsoid.xdmf`, you can create the fibers as follows:
+
+### Fiber Generation
+This repository provides an ellispoid tagged mesh for reference purposes in the folder `./meshes`.
+Use the mesh `./meshes/ellipsoid_0.005.xdmf`, you can create the fibers as follows:
 
 ```shell
-dolfin/ellipsoid_fiber_generation.py ./meshes/ellipsoid.xdmf
+cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py ./meshes/ellipsoid.xdmf
 ```
 
 If succesfull, the script will create fibers in `xdmf` and `vtk` files in a `./results/` folder.
@@ -34,5 +39,19 @@ If succesfull, the script will create fibers in `xdmf` and `vtk` files in a `./r
 Further options can be found with:
 
 ```shell
-dolfin/ellipsoid_fiber_generation.py --help
+cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py --help
 ```
+
+
+## Mesh Generation
+The ellipsoid domain can be created with a characteristic element size (default is `0.005 [m]`) using the
+script `mesh_generation.py`. It will create a folder structure `./results` to stores `xdmf` as well as `pvd` formats
+for further usage.
+
+To execute it, consider the following command:
+```shell
+cardiac_benchmark_toolkit/mesh_generation.py -size 0.007
+```
+
+It will create an ellipsoid mesh with characteristic element size of `0.007 [m]`. You can use it in conjuntion with the
+`ellipsoid_fiber_generation` to create the fiber directions for your specific simulation (and benchmark).
