@@ -9,7 +9,7 @@ as well as the fibers in the cardiac mechanics benchmark in dolfin (legacy).
 
 ## Installation
 
-*Docker*
+**Docker** (Recommended)
 Run the following command to start a container with all the required dependencies:
 
 ```shell
@@ -22,9 +22,30 @@ In order to enter the shell, use:
 docker exec -ti dolfin-stable /bin/bash -l
 ```
 
-**Note** docker image is cortesy of *Simula Lab*.
+**Note** docker image is courtesy of *Simula Lab*.
+
+### Local Installation
+
+If your system has already `fenics` version `2019.1.0.post0`, you can install this package typing:
+
+```shell
+pip3 install .
+```
 
 ## Quickstart
+
+## Mesh Generation
+The ellipsoid domain can be created with a characteristic element size (default is `0.005 [m]`) using the
+script `mesh_generation.py`. It will create a folder structure `./results` to stores `xdmf` as well as `pvd` formats
+for further usage.
+
+To execute it, consider the following command:
+```shell
+cardiac_benchmark_toolkit/mesh_generation.py -size 0.007
+```
+
+It will create an ellipsoid mesh with characteristic element size of `0.007 [m]`. You can use it in conjuntion with the
+`ellipsoid_fiber_generation` to create the fiber directions for your specific simulation (and benchmark).
 
 ### Fiber Generation
 This repository provides an ellispoid tagged mesh for reference purposes in the folder `./meshes`.
@@ -41,17 +62,3 @@ Further options can be found with:
 ```shell
 cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py --help
 ```
-
-
-## Mesh Generation
-The ellipsoid domain can be created with a characteristic element size (default is `0.005 [m]`) using the
-script `mesh_generation.py`. It will create a folder structure `./results` to stores `xdmf` as well as `pvd` formats
-for further usage.
-
-To execute it, consider the following command:
-```shell
-cardiac_benchmark_toolkit/mesh_generation.py -size 0.007
-```
-
-It will create an ellipsoid mesh with characteristic element size of `0.007 [m]`. You can use it in conjuntion with the
-`ellipsoid_fiber_generation` to create the fiber directions for your specific simulation (and benchmark).
