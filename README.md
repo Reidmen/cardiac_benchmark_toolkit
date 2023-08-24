@@ -7,6 +7,8 @@ as well as the fibers in the cardiac mechanics benchmark in dolfin (legacy).
 
 *For the [dolfinx](https://github.com/FEniCS/dolfinx) implementation of the tools, [check here](https://github.com/Reidmen/cardiac_benchmark_toolkitx)*
 
+![fiber_directions](figs/fiber_and_sheet_directions.png)
+
 ## Installation
 
 **Docker** (Recommended)
