@@ -49,6 +49,9 @@ cardiac_benchmark_toolkit/mesh_generation.py -size 0.007
 It will create an ellipsoid mesh with characteristic element size of `0.007 [m]`. You can use it in conjuntion with the
 `ellipsoid_fiber_generation` to create the fiber directions for your specific simulation (and benchmark).
 
+Examples of mesh at two different element sizes can be seen below:
+![comparison_meshes](figs/comparison_meshes.png)
+
 ### Fiber Generation
 This repository provides an ellispoid tagged mesh for reference purposes in the folder `./meshes`.
 Use the mesh `./meshes/ellipsoid_0.005.xdmf`, you can create the fibers as follows:
