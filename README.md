@@ -37,6 +37,8 @@ pip3 install .
 ## Quickstart
 
 ## Mesh Generation
+
+### Ellipsoid domain
 The ellipsoid domain can be created with a characteristic element size (default is `0.005 [m]`) using the
 script `mesh_generation.py`. It will create a folder structure `./results` to stores `xdmf` as well as `pvd` formats
 for further usage.
@@ -50,7 +52,13 @@ It will create an ellipsoid mesh with characteristic element size of `0.007 [m]`
 `ellipsoid_fiber_generation` to create the fiber directions for your specific simulation (and benchmark).
 
 Examples of mesh at two different element sizes can be seen below:
-![comparison_meshes](figs/comparison_meshes.png)
+![comparison-meshes](figs/comparison_meshes.png)
+
+### Biventricular domain
+The biventricular domain is provided in the `./data/` including source files in `vtk`, `pvd` for fine and coarse sizes.
+Example of a fine geometry is depicted below:
+![biventricular-fine](figs/labeled_domain_fine_reference.png)
+
 
 ### Fiber Generation
 This repository provides an ellispoid tagged mesh for reference purposes in the folder `./meshes`.
@@ -67,3 +75,18 @@ Further options can be found with:
 ```shell
 cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py --help
 ```
+
+### Fiber Generation for FEniCS
+Reference fibers created using the [lifex](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-023-05260-w)
+can be found in the subfolder in `./data/` as `fiber_biv.vtk`. This repository includes options to
+generate FEniCS-compatible `h5` format for fiber directions.
+
+To crate fibers for the fine mesh in P2, run in your shell:
+```shell
+python3 cardiac_benchmark_toolkit/mesh_generation.py -create_from_data data/biv_mesh_and_fibers_fine_p2 -deg 2
+```
+
+The command line above will create fiber, sheet and sheet-normal directions from the `vtk` source files in `./data/biv_mesh_and_fibers_fine_p2`.
+
+Depicted below are fiber (left) and sheet (right) directions created from this procedure.
+![fiber-sheet-biv](figs/comparison_fiber_and_sheet_lifex.png)
