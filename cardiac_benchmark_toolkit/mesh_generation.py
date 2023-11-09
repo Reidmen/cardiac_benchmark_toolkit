@@ -2,11 +2,36 @@ import argparse
 from pathlib import Path
 import subprocess
 import sys
+import numpy as np
 
 import meshio
 
 from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
-from dolfin import Mesh, MeshFunction, MeshValueCollection, XDMFFile
+from dolfin import (
+    File,
+    Function,
+    FunctionSpace,
+    HDF5File,
+    Mesh,
+    MeshFunction,
+    MeshValueCollection,
+    VectorFunctionSpace,
+    XDMFFile,
+)
+
+from cardiac_benchmark_toolkit.ellipsoid_fiber_generation import read_mesh
+
+
+def init_xdmf(
+    path_to_folder: Path, filename: str = "fiber_directions"
+) -> XDMFFile:
+    """Initialize xdmf file using options dictionary"""
+    path_to_file = path_to_folder.joinpath(f"{filename}.xdmf")
+    xdmf_file = XDMFFile(str(path_to_file))
+    xdmf_file.parameters["flush_output"] = True
+    xdmf_file.parameters["functions_share_mesh"] = True
+
+    return xdmf_file
 
 
 def ellipsoid_mesh(
@@ -120,6 +145,7 @@ def ellipsoid_mesh(
         Physical Point("ENDOPT") = {{ apex_endo }};
         Physical Point("EPIPT") = {{ apex_epi }};
     """
+    Path(path).mkdir(exist_ok=True, parents=True)
 
     geofile = Path(path).joinpath(f"ellipsoid_{hc}.geo")
     outfile = Path(path).joinpath(f"ellipsoid_{hc}.msh")
@@ -183,6 +209,152 @@ def ellipsoid_mesh(
         Path(pth_bnd).unlink()
 
 
+def biventricular_domain_from_mesh_and_fibers(
+    path_to_folder: Path | str, element_space: int = 1
+) -> None:
+    """Process biventricular domain with with output fibers"""
+    import vtk
+
+    assert isinstance(element_space, int)
+    assert isinstance(path_to_folder, (Path, str))
+
+    xdmf_path = Path(path_to_folder)
+    xdmf_path.mkdir(exist_ok=True, parents=True)
+
+    domain_path = xdmf_path.joinpath("bi_ventricular.xdmf")
+    fiber_path = xdmf_path.joinpath("fibers_biv.vtk")
+    mesh, _ = read_mesh(domain_path.as_posix())
+
+    V = VectorFunctionSpace(mesh, "CG", int(element_space))
+    fiber = Function(V, name="fiber")
+    sheet = Function(V, name="sheet")
+    sheet_normal = Function(V, name="sheet_normal")
+
+    (
+        points_vtk,
+        fiber_vtk,
+        sheet_vtk,
+        sheet_normal_vtk,
+    ) = load_vtk_data_from_filepath(fiber_path.as_posix())
+
+    names = ["fiber", "sheet", "sheet_normal"]
+    directions = [fiber, sheet, sheet_normal]
+    vtk_directions = [fiber_vtk, sheet_vtk, sheet_normal_vtk]
+    idx_0, idx_1, idx_2 = compute_transfer_indices_vtk_to_dolfin(V, points_vtk)
+
+    print("Loading fiber files in the standard format")
+    for func, vtk_func, name in zip(directions, vtk_directions, names):
+        dofs_0 = func.function_space().sub(0).dofmap().dofs()
+        dofs_1 = func.function_space().sub(1).dofmap().dofs()
+        dofs_2 = func.function_space().sub(2).dofmap().dofs()
+
+        func.vector()[dofs_0] = vtk_func[:, 0][idx_0]
+        func.vector()[dofs_1] = vtk_func[:, 1][idx_1]
+        func.vector()[dofs_2] = vtk_func[:, 2][idx_2]
+
+    print("Saving fiber files in the standard format")
+    for func, name in zip(directions, names):
+        hdf5_file = xdmf_path.joinpath(
+            f"fibers/h5_format/bi_ventricular_{name}.h5"
+        )
+
+        with HDF5File(mesh.mpi_comm(), hdf5_file.as_posix(), "w") as hdf:
+            hdf.write(func, "/" + name)
+
+        vtk_fiber = File(
+            xdmf_path.joinpath(
+                f"fibers/pvd_format/bi_ventricular_{name}.pvd"
+            ).as_posix()
+        )
+        vtk_fiber << func
+        print(
+            f"Wrote {name} in path {hdf5_file.as_posix()} alongside VTK format"
+        )
+
+    save_into_xdmf(xdmf_path, fiber, sheet, sheet_normal)
+
+
+def save_into_xdmf(
+    path_to_save: Path,
+    fiber: Function,
+    sheet: Function,
+    sheet_normal: Function,
+) -> None:
+    print(f"Saving into XDMF format in {path_to_save.as_posix()}")
+    xdmf_file = init_xdmf(path_to_save)
+    xdmf_file.write(fiber, 0.0)
+    xdmf_file.write(sheet, 0.0)
+    xdmf_file.write(sheet_normal, 0.0)
+    xdmf_file.close()
+
+
+def load_vtk_data_from_filepath(
+    filepath: str | Path,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]:
+    """Loads vtk points, fiber, sheet and sheet-normal directions"""
+    import vtk
+
+    print("Loading vtk files")
+    if isinstance(filepath, str):
+        filepath = Path(filepath)
+
+    fibers_fields = vtk.vtkGenericDataObjectReader()
+    fibers_fields.SetFileName(filepath.as_posix())
+    fibers_fields.ReadAllVectorsOn()
+    fibers_fields.Update()
+
+    points = np.array(fibers_fields.GetOutput().GetPoints().GetData())
+    fiber_vtk = np.array(
+        fibers_fields.GetOutput().GetPointData().GetArray("f0")
+    )
+    sheet_vtk = np.array(
+        fibers_fields.GetOutput().GetPointData().GetArray("s0")
+    )
+    sheet_normal_vtk = np.array(
+        fibers_fields.GetOutput().GetPointData().GetArray("n0")
+    )
+
+    return points, fiber_vtk, sheet_vtk, sheet_normal_vtk
+
+
+def compute_transfer_indices_vtk_to_dolfin(
+    V: FunctionSpace, vtk_points: np.ndarray
+) -> tuple[list[int], list[int], list[int]]:
+    """Computers transfer indices from vtk point arrays to dolfin function space"""
+    print("Computing transfer index between vtk and dolfin")
+    coords_0, coords_1, coords_2 = get_subspace_coordinates(V)
+    idx_0, idx_1, idx_2 = [], [], []
+
+    for coords, transfer_idx in zip(
+        [coords_0],
+        [idx_0],
+    ):
+        for point in coords:
+            distance_vector = np.sqrt(
+                np.sum((point - vtk_points) ** 2, axis=1)
+            )
+            min_index = np.argmin(distance_vector)
+            transfer_idx.append(min_index)
+
+    return idx_0, idx_0, idx_0
+
+
+def get_subspace_coordinates(
+    V: FunctionSpace,
+) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    """Get coordinates of subspaces (dim 3 fixed)"""
+    total_dofs_coordinates = V.tabulate_dof_coordinates()
+    dofs_0 = V.sub(0).dofmap().dofs()
+    dofs_1 = V.sub(1).dofmap().dofs()
+    dofs_2 = V.sub(2).dofmap().dofs()
+
+    coords_sub_0 = total_dofs_coordinates[dofs_0, :]
+    coords_sub_1 = total_dofs_coordinates[dofs_1, :]
+    coords_sub_2 = total_dofs_coordinates[dofs_2, :]
+
+    return coords_sub_0, coords_sub_1, coords_sub_2
+
+
 def get_parser():
     """Get arguments parser.
 
@@ -194,6 +366,20 @@ def get_parser():
         Generate ellipsoid mesh, with optional path and element size.
         """,
         formatter_class=argparse.RawDescriptionHelpFormatter,
+    )
+    parser.add_argument(
+        "-create_from_data",
+        "--create_mesh_and_fibers_from_folder",
+        type=str,
+        default=None,
+        help="Path to mesh and fiber (single folder)",
+    )
+    parser.add_argument(
+        "-deg",
+        "--element_degree",
+        type=int,
+        default=0,
+        help="FE degree for interpolation of fibers",
     )
     parser.add_argument(
         "-path",
@@ -215,6 +401,15 @@ def get_parser():
 
 if __name__ == "__main__":
     args: argparse.Namespace = get_parser().parse_args()
+    print(args)
 
     if len(sys.argv) > 1:
-        ellipsoid_mesh(args.element_size, path=args.path_to_save)
+        if (
+            args.create_mesh_and_fibers_from_folder is not None
+            and args.element_degree > 0
+        ):
+            biventricular_domain_from_mesh_and_fibers(
+                args.create_mesh_and_fibers_from_folder, args.element_degree
+            )
+        else:
+            ellipsoid_mesh(args.element_size, path=args.path_to_save)

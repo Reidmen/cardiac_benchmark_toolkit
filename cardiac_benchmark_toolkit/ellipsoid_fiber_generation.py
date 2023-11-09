@@ -1,12 +1,8 @@
 import argparse
 from dataclasses import dataclass
-from enum import Enum
 import pathlib
 from typing import Literal
 
-import numpy as np
-
-from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 from dolfin import (
     Constant,
     DirichletBC,
@@ -23,6 +19,9 @@ from dolfin import (
     XDMFFile,
 )
 from dolfin import dot, dx, grad, interpolate, solve
+import numpy as np
+
+from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 
 
 @dataclass(frozen=True)
@@ -345,13 +344,15 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-space",
         "--function_space",
+        type=str,
         default="P1",
-        help="function space for fibers to be interpolated.",
+        help="function space for fibers to be interpolated. e.g 'P1', 'P2'",
     )
     parser.add_argument(
         "-save",
         "--path_to_save",
         default="./results/",
+        type=str,
         help="path to save fibers, expected as relative path"
         "e.g. './results/' (default).",
     )
