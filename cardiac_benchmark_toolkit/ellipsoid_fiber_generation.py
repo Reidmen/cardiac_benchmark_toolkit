@@ -1,12 +1,8 @@
 import argparse
 from dataclasses import dataclass
-from enum import Enum
 import pathlib
 from typing import Literal
 
-import numpy as np
-
-from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 from dolfin import (
     Constant,
     DirichletBC,
@@ -23,6 +19,9 @@ from dolfin import (
     XDMFFile,
 )
 from dolfin import dot, dx, grad, interpolate, solve
+import numpy as np
+
+from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 
 
 @dataclass(frozen=True)
