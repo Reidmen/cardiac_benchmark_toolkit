@@ -154,9 +154,3 @@ cython_debug/
 
 # ignore results folder
 /results
-
-# ignore meshes, but provide one case as reference
-meshes/*
-!/meshes/ellipsoid_0.005.h5
-!/meshes/ellipsoid_0.005.xdmf
-
