@@ -145,6 +145,7 @@ def ellipsoid_mesh(
         Physical Point("ENDOPT") = {{ apex_endo }};
         Physical Point("EPIPT") = {{ apex_epi }};
     """
+    Path(path).mkdir(exist_ok=True, parents=True)
 
     geofile = Path(path).joinpath(f"ellipsoid_{hc}.geo")
     outfile = Path(path).joinpath(f"ellipsoid_{hc}.msh")
