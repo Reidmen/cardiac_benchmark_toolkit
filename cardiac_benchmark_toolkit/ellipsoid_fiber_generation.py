@@ -344,13 +344,15 @@ def get_parser() -> argparse.ArgumentParser:
     parser.add_argument(
         "-space",
         "--function_space",
+        type=str,
         default="P1",
-        help="function space for fibers to be interpolated.",
+        help="function space for fibers to be interpolated. e.g 'P1', 'P2'",
     )
     parser.add_argument(
         "-save",
         "--path_to_save",
         default="./results/",
+        type=str,
         help="path to save fibers, expected as relative path"
         "e.g. './results/' (default).",
     )
