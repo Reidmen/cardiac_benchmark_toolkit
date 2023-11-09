@@ -60,12 +60,12 @@ Example of a fine geometry is depicted below:
 ![biventricular-fine](figs/labeled_domain_fine_reference.png)
 
 
-### Fiber Generation
-This repository provides an ellispoid tagged mesh for reference purposes in the folder `./meshes`.
-Use the mesh `./meshes/ellipsoid_0.005.xdmf`, you can create the fibers as follows:
+### Ellipsoid Fiber Generation
+This repository provides a tagged ellipsoid geometry for reference purposes in the folder `./data/monoventricle_mesh/`.
+Using the mesh `./monoventricle_mesh/ellipsoid_0.005.xdmf`, you can create the fibers as follows:
 
 ```shell
-cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py ./meshes/ellipsoid.xdmf
+cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py ./monoventricle_mesh/ellipsoid_0.005.xdmf
 ```
 
 If succesfull, the script will create fibers in `xdmf` and `vtk` files in a `./results/` folder.
@@ -76,7 +76,7 @@ Further options can be found with:
 cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py --help
 ```
 
-### Fiber Generation for FEniCS
+### Biventricular Fiber Generation (LifeX -> FEniCS)
 Reference fibers created using the [lifex](https://bmcbioinformatics.biomedcentral.com/articles/10.1186/s12859-023-05260-w)
 can be found in the subfolder in `./data/` as `fiber_biv.vtk`. This repository includes options to
 generate FEniCS-compatible `h5` format for fiber directions.
