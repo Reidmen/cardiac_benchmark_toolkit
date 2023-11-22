@@ -361,9 +361,5 @@ def get_parser() -> argparse.ArgumentParser:
 
 
 if __name__ == "__main__":
-    # TODO
-    # check for mesh
-    # if mesh not provided, create ellipsoid domain
     args = get_parser().parse_args()
-    # print(args)
     main(args.path_to_mesh, args.function_space, args.path_to_save)
