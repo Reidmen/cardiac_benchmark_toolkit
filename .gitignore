@@ -152,6 +152,7 @@ dmypy.json
 # Cython debug symbols
 cython_debug/
 
-# ignore results folder
-/results
-/meshes
+# ignore results & data folder
+results/
+meshes/
+data/

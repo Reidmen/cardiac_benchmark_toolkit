@@ -1,12 +1,9 @@
 import argparse
 from pathlib import Path
+import pathlib
 import subprocess
 import sys
-import numpy as np
 
-import meshio
-
-from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 from dolfin import (
     File,
     Function,
@@ -18,7 +15,10 @@ from dolfin import (
     VectorFunctionSpace,
     XDMFFile,
 )
+import meshio
+import numpy as np
 
+from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 from cardiac_benchmark_toolkit.ellipsoid_fiber_generation import read_mesh
 
 
@@ -213,17 +213,16 @@ def biventricular_domain_from_mesh_and_fibers(
     path_to_folder: Path | str, element_space: int = 1
 ) -> None:
     """Process biventricular domain with with output fibers"""
-    import vtk
-
     assert isinstance(element_space, int)
     assert isinstance(path_to_folder, (Path, str))
+    print(f"Creating mesh with fibers in P{element_space}")
 
     xdmf_path = Path(path_to_folder)
     xdmf_path.mkdir(exist_ok=True, parents=True)
 
     domain_path = xdmf_path.joinpath("bi_ventricular.xdmf")
     fiber_path = xdmf_path.joinpath("fibers_biv.vtk")
-    mesh, _ = read_mesh(domain_path.as_posix())
+    mesh, boundaries = read_mesh(domain_path.as_posix())
 
     V = VectorFunctionSpace(mesh, "CG", int(element_space))
     fiber = Function(V, name="fiber")
@@ -240,21 +239,23 @@ def biventricular_domain_from_mesh_and_fibers(
     names = ["fiber", "sheet", "sheet_normal"]
     directions = [fiber, sheet, sheet_normal]
     vtk_directions = [fiber_vtk, sheet_vtk, sheet_normal_vtk]
-    idx_0, idx_1, idx_2 = compute_transfer_indices_vtk_to_dolfin(V, points_vtk)
+    idx_0 = compute_transfer_indices_vtk_to_dolfin(V, points_vtk)
 
-    print("Loading fiber files in the standard format")
-    for func, vtk_func, name in zip(directions, vtk_directions, names):
-        dofs_0 = func.function_space().sub(0).dofmap().dofs()
-        dofs_1 = func.function_space().sub(1).dofmap().dofs()
-        dofs_2 = func.function_space().sub(2).dofmap().dofs()
+    load_fibers_with_vtk_data(directions, vtk_directions, names, idx_0)
+    save_mesh_and_boundaries_into_vtk(xdmf_path, mesh, boundaries)
+    save_fibers_into_h5_and_vtk(xdmf_path, mesh, directions, names)
+    save_into_xdmf(xdmf_path, fiber, sheet, sheet_normal)
 
-        func.vector()[dofs_0] = vtk_func[:, 0][idx_0]
-        func.vector()[dofs_1] = vtk_func[:, 1][idx_1]
-        func.vector()[dofs_2] = vtk_func[:, 2][idx_2]
 
+def save_fibers_into_h5_and_vtk(
+    pathfolder: pathlib.Path,
+    mesh: Mesh,
+    directions: list[Function],
+    names: list[str],
+) -> None:
     print("Saving fiber files in the standard format")
     for func, name in zip(directions, names):
-        hdf5_file = xdmf_path.joinpath(
+        hdf5_file = pathfolder.joinpath(
             f"fibers/h5_format/bi_ventricular_{name}.h5"
         )
 
@@ -262,7 +263,7 @@ def biventricular_domain_from_mesh_and_fibers(
             hdf.write(func, "/" + name)
 
         vtk_fiber = File(
-            xdmf_path.joinpath(
+            pathfolder.joinpath(
                 f"fibers/pvd_format/bi_ventricular_{name}.pvd"
             ).as_posix()
         )
@@ -271,7 +272,38 @@ def biventricular_domain_from_mesh_and_fibers(
             f"Wrote {name} in path {hdf5_file.as_posix()} alongside VTK format"
         )
 
-    save_into_xdmf(xdmf_path, fiber, sheet, sheet_normal)
+
+def load_fibers_with_vtk_data(
+    directions: list[Function],
+    vtk_directions: list[np.ndarray],
+    names: list[str],
+    idx_map: list[int],
+) -> None:
+    print("Loading fiber files in the standard format")
+    for func, vtk_func, name in zip(directions, vtk_directions, names):
+        dofs_0 = func.function_space().sub(0).dofmap().dofs()
+        dofs_1 = func.function_space().sub(1).dofmap().dofs()
+        dofs_2 = func.function_space().sub(2).dofmap().dofs()
+
+        func.vector()[dofs_0] = vtk_func[:, 0][idx_map]
+        func.vector()[dofs_1] = vtk_func[:, 1][idx_map]
+        func.vector()[dofs_2] = vtk_func[:, 2][idx_map]
+
+
+def save_mesh_and_boundaries_into_vtk(
+    folderpath: pathlib.Path, mesh: Mesh, boundaries: MeshFunction
+) -> None:
+    assert isinstance(mesh, Mesh)
+    # boundaries type MeshFunctionSizet (dolfin.cpp)
+    vtkfile = File(folderpath.joinpath("vtk/bi_ventricular.pvd").as_posix())
+    mfunc = MeshFunction("size_t", mesh, 3)
+    mfunc.set_all(0)
+
+    vtkfile << mesh
+    vtkfile << boundaries
+    vtkfile << mfunc
+
+    print("Wrote mesh, boundaries in PVD format")
 
 
 def save_into_xdmf(
@@ -319,11 +351,12 @@ def load_vtk_data_from_filepath(
 
 def compute_transfer_indices_vtk_to_dolfin(
     V: FunctionSpace, vtk_points: np.ndarray
-) -> tuple[list[int], list[int], list[int]]:
+) -> list[int]:
     """Computers transfer indices from vtk point arrays to dolfin function space"""
     print("Computing transfer index between vtk and dolfin")
     coords_0, coords_1, coords_2 = get_subspace_coordinates(V)
-    idx_0, idx_1, idx_2 = [], [], []
+    # coordinates are repeated, same subspaces
+    idx_0 = []
 
     for coords, transfer_idx in zip(
         [coords_0],
@@ -336,7 +369,7 @@ def compute_transfer_indices_vtk_to_dolfin(
             min_index = np.argmin(distance_vector)
             transfer_idx.append(min_index)
 
-    return idx_0, idx_0, idx_0
+    return idx_0
 
 
 def get_subspace_coordinates(
