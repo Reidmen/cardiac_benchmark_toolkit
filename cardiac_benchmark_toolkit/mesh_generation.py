@@ -213,8 +213,6 @@ def biventricular_domain_from_mesh_and_fibers(
     path_to_folder: Path | str, element_space: int = 1
 ) -> None:
     """Process biventricular domain with with output fibers"""
-    import vtk
-
     assert isinstance(element_space, int)
     assert isinstance(path_to_folder, (Path, str))
     print(f"Creating mesh with fibers in P{element_space}")
@@ -241,7 +239,7 @@ def biventricular_domain_from_mesh_and_fibers(
     names = ["fiber", "sheet", "sheet_normal"]
     directions = [fiber, sheet, sheet_normal]
     vtk_directions = [fiber_vtk, sheet_vtk, sheet_normal_vtk]
-    idx_0, _, _ = compute_transfer_indices_vtk_to_dolfin(V, points_vtk)
+    idx_0 = compute_transfer_indices_vtk_to_dolfin(V, points_vtk)
 
     load_fibers_with_vtk_data(directions, vtk_directions, names, idx_0)
     save_mesh_and_boundaries_into_vtk(xdmf_path, mesh, boundaries)
@@ -353,11 +351,12 @@ def load_vtk_data_from_filepath(
 
 def compute_transfer_indices_vtk_to_dolfin(
     V: FunctionSpace, vtk_points: np.ndarray
-) -> tuple[list[int], list[int], list[int]]:
+) -> list[int]:
     """Computers transfer indices from vtk point arrays to dolfin function space"""
     print("Computing transfer index between vtk and dolfin")
     coords_0, coords_1, coords_2 = get_subspace_coordinates(V)
-    idx_0, idx_1, idx_2 = [], [], []
+    # coordinates are repeated, same subspaces
+    idx_0 = []
 
     for coords, transfer_idx in zip(
         [coords_0],
@@ -370,7 +369,7 @@ def compute_transfer_indices_vtk_to_dolfin(
             min_index = np.argmin(distance_vector)
             transfer_idx.append(min_index)
 
-    return idx_0, idx_0, idx_0
+    return idx_0
 
 
 def get_subspace_coordinates(
