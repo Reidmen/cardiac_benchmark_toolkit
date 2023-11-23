@@ -3,11 +3,7 @@ from pathlib import Path
 import pathlib
 import subprocess
 import sys
-import numpy as np
 
-import meshio
-
-from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 from dolfin import (
     File,
     Function,
@@ -19,7 +15,10 @@ from dolfin import (
     VectorFunctionSpace,
     XDMFFile,
 )
+import meshio
+import numpy as np
 
+from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
 from cardiac_benchmark_toolkit.ellipsoid_fiber_generation import read_mesh
 
 
