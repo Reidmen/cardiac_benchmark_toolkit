@@ -1,4 +1,3 @@
-import argparse
 from dataclasses import dataclass
 import pathlib
 from typing import Literal
@@ -16,12 +15,12 @@ from dolfin import (
     TrialFunction,
     UserExpression,
     VectorFunctionSpace,
-    XDMFFile,
 )
 from dolfin import dot, dx, grad, interpolate, solve
 import numpy as np
 
 from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
+from cardiac_benchmark_toolkit.utils import read_mesh
 
 
 @dataclass(frozen=True)
@@ -63,13 +62,13 @@ class FiberExpression(UserExpression):
         dr_l = r_long_epi - r_long_endo
         cos_u, sin_v = np.cos(u), np.sin(v)
         sin_u, cos_v = np.sin(u), np.cos(v)
-        e_11, e_12, e_13 = dr_l * cos_u, -r_l * sin_u, 0.0
-        e_21, e_22, e_23 = (
+        _, e_12, e_13 = dr_l * cos_u, -r_l * sin_u, 0.0
+        _, e_22, e_23 = (
             dr_l * cos_u * sin_v,
             r_s * cos_u * cos_v,
             -r_s * sin_u * sin_v,
         )
-        e_31, e_32, e_33 = (
+        _, e_32, e_33 = (
             dr_s * sin_u * sin_v,
             r_s * cos_u * sin_v,
             r_s * sin_u * cos_v,
@@ -129,13 +128,13 @@ class SheetNormalExpression(UserExpression):
         dr_l = r_long_epi - r_long_endo
         cos_u, sin_v = np.cos(u), np.sin(v)
         sin_u, cos_v = np.sin(u), np.cos(v)
-        e_11, e_12, e_13 = dr_l * cos_u, -r_l * sin_u, 0.0
-        e_21, e_22, e_23 = (
+        _, e_12, e_13 = dr_l * cos_u, -r_l * sin_u, 0.0
+        _, e_22, e_23 = (
             dr_l * cos_u * sin_v,
             r_s * cos_u * cos_v,
             -r_s * sin_u * sin_v,
         )
-        e_31, e_32, e_33 = (
+        _, e_32, e_33 = (
             dr_s * sin_u * sin_v,
             r_s * cos_u * sin_v,
             r_s * sin_u * cos_v,
@@ -188,47 +187,6 @@ class SheetExpression(UserExpression):
 
     def value_shape(self) -> tuple[Literal[3]]:
         return (3,)
-
-
-def read_mesh(mesh_file: str) -> tuple[Mesh, MeshFunction]:
-    tmp = mesh_file.split(".")  # [-1].split('.')
-    file_type = tmp[-1]
-
-    if file_type == "h5":
-        mesh = Mesh()
-
-        with HDF5File(mesh.mpi_comm(), mesh_file, "r") as hdf:
-            hdf.read(mesh, "/mesh", False)
-            boundaries = MeshFunction(
-                "size_t", mesh, mesh.topology().dim() - 1
-            )
-
-            if hdf.has_dataset("boundaries"):
-                hdf.read(boundaries, "/boundaries")
-            else:
-                if mesh.mpi_comm().Get_rank() == 0:
-                    print(
-                        "no <boundaries> datasets found in file {}".format(
-                            mesh_file
-                        )
-                    )
-
-    elif file_type == "xdmf":
-
-        mesh = Mesh()
-
-        with XDMFFile(mesh_file) as xf:
-            xf.read(mesh)
-            boundaries = MeshFunction(
-                "size_t", mesh, mesh.topology().dim() - 1, 0
-            )
-
-            xf.read(boundaries)
-
-    else:
-        raise Exception("Mesh format not recognized. Use XDMF or HDF5.")
-
-    return mesh, boundaries
 
 
 def transmural_distance_problem(
@@ -317,49 +275,15 @@ def save_fibers_to_files(fibers: FiberDirections, path_to_save: str) -> None:
         print(f"wrote {name} in path {str(path_to_h5)} and {str(path_to_vtk)}")
 
 
-def main(
+def create_fibers_for_ellipsoid(
     path_to_mesh: str,
-    function_space_degree: str = "P1",
+    function_space_degree: int = 1,
     path_to_save: str = "./results/",
 ) -> None:
 
-    if function_space_degree.lower() not in ("p1", "p2"):
-        raise Exception("Only P1 / P2 as function spaces for benchmark")
-
-    deg = int(function_space_degree.lower()[1])
+    deg = function_space_degree
     mesh, mesh_function = read_mesh(path_to_mesh)
     transmural_distance = transmural_distance_problem(mesh, mesh_function, deg)
     fibers = build_orientations(mesh, transmural_distance, deg)
     save_mesh_to_files(mesh, mesh_function, path_to_save)
     save_fibers_to_files(fibers, path_to_save)
-
-
-def get_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(
-        description="""Compute fiber, sheet and sheet_normal directions
-        from input mesh.""",
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    parser.add_argument("path_to_mesh", type=str, help="path to mesh file.")
-    parser.add_argument(
-        "-space",
-        "--function_space",
-        type=str,
-        default="P1",
-        help="function space for fibers to be interpolated. e.g 'P1', 'P2'",
-    )
-    parser.add_argument(
-        "-save",
-        "--path_to_save",
-        default="./results/",
-        type=str,
-        help="path to save fibers, expected as relative path"
-        "e.g. './results/' (default).",
-    )
-
-    return parser
-
-
-if __name__ == "__main__":
-    args = get_parser().parse_args()
-    main(args.path_to_mesh, args.function_space, args.path_to_save)
