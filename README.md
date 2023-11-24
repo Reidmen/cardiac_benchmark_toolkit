@@ -36,6 +36,14 @@ pip3 install .
 
 ## Quickstart
 
+To have an overview of the options available through this package, execute it your terminal
+
+```shell
+cardiac-benchmark-toolkit --help
+```
+It the installation was succesfull you should be prompted with the following:
+![prompt-help](figs/toolkit_main_options.png)
+
 ## Mesh Generation
 
 ### Ellipsoid domain
@@ -45,8 +53,14 @@ for further usage.
 
 To execute it, consider the following command:
 ```shell
-cardiac_benchmark_toolkit/mesh_generation.py -size 0.007
+cardiac-benchmark-toolkit create-ellipsoid --char-length 0.007
 ```
+
+Its command details can be seen with:
+```
+cardiac-benchmark-toolkit create-ellipsoid --help
+```
+![prompt-ellipsoid-help](figs/toolkit_ellipsoid_options.png)
 
 It will create an ellipsoid mesh with characteristic element size of `0.007 [m]`. You can use it in conjuntion with the
 `ellipsoid_fiber_generation` to create the fiber directions for your specific simulation (and benchmark).
@@ -65,7 +79,7 @@ This repository provides a tagged ellipsoid geometry for reference purposes in t
 Using the mesh `./monoventricle_mesh/ellipsoid_0.005.xdmf`, you can create the fibers as follows:
 
 ```shell
-cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py ./monoventricle_mesh/ellipsoid_0.005.xdmf
+cardiac-benchamrk-toolkit create-fibers-for-ellipsoid-mesh ./monoventricle_mesh/ellipsoid_0.005.xdmf
 ```
 
 If succesfull, the script will create fibers in `xdmf` and `vtk` files in a `./results/` folder.
@@ -73,7 +87,7 @@ If succesfull, the script will create fibers in `xdmf` and `vtk` files in a `./r
 Further options can be found with:
 
 ```shell
-cardiac_benchmark_toolkit/ellipsoid_fiber_generation.py --help
+cardiac-benchmark-toolkit create-fibers-for-ellipsoid-mesh --help
 ```
 
 ### Biventricular Fiber Generation (LifeX -> FEniCS)
@@ -83,7 +97,7 @@ generate FEniCS-compatible `h5` format for fiber directions.
 
 To crate fibers for the fine mesh in P2, run in your shell:
 ```shell
-python3 cardiac_benchmark_toolkit/mesh_generation.py -create_from_data data/biv_mesh_and_fibers_fine_p2 -deg 2
+cardiac-benchmark-toolkit create-biv-domain-from-mesh-and-fibers data/biv_mesh_and_fibers_fine_p2/ --element_degree 2
 ```
 
 The command line above will create fiber, sheet and sheet-normal directions from the `vtk` source files in `./data/biv_mesh_and_fibers_fine_p2`.
