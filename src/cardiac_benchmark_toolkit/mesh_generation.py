@@ -1,8 +1,6 @@
-import argparse
-from pathlib import Path
 import pathlib
+from pathlib import Path
 import subprocess
-import sys
 
 from dolfin import (
     File,
@@ -19,11 +17,11 @@ import meshio
 import numpy as np
 
 from cardiac_benchmark_toolkit.data import DEFAULTS, MARKERS
-from cardiac_benchmark_toolkit.ellipsoid_fiber_generation import read_mesh
+from cardiac_benchmark_toolkit.utils import read_mesh
 
 
 def init_xdmf(
-    path_to_folder: Path, filename: str = "fiber_directions"
+    path_to_folder: pathlib.Path, filename: str = "fiber_directions"
 ) -> XDMFFile:
     """Initialize xdmf file using options dictionary"""
     path_to_file = path_to_folder.joinpath(f"{filename}.xdmf")
@@ -34,7 +32,7 @@ def init_xdmf(
     return xdmf_file
 
 
-def ellipsoid_mesh(
+def create_ellipsoid_mesh(
     hc: float,
     defaults: DEFAULTS = DEFAULTS(),
     markers: MARKERS = MARKERS(),
@@ -209,7 +207,7 @@ def ellipsoid_mesh(
         Path(pth_bnd).unlink()
 
 
-def biventricular_domain_from_mesh_and_fibers(
+def create_biventricular_domain_from_mesh_and_fibers(
     path_to_folder: Path | str, element_space: int = 1
 ) -> None:
     """Process biventricular domain with with output fibers"""
@@ -386,63 +384,3 @@ def get_subspace_coordinates(
     coords_sub_2 = total_dofs_coordinates[dofs_2, :]
 
     return coords_sub_0, coords_sub_1, coords_sub_2
-
-
-def get_parser():
-    """Get arguments parser.
-
-    Returns:
-        parser
-    """
-    parser = argparse.ArgumentParser(
-        description="""
-        Generate ellipsoid mesh, with optional path and element size.
-        """,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
-    )
-    parser.add_argument(
-        "-create_from_data",
-        "--create_mesh_and_fibers_from_folder",
-        type=str,
-        default=None,
-        help="Path to mesh and fiber (single folder)",
-    )
-    parser.add_argument(
-        "-deg",
-        "--element_degree",
-        type=int,
-        default=0,
-        help="FE degree for interpolation of fibers",
-    )
-    parser.add_argument(
-        "-path",
-        "--path_to_save",
-        type=str,
-        default="./meshes/",
-        help="Path where meshes are written",
-    )
-    parser.add_argument(
-        "-size",
-        "--element_size",
-        metavar="hc",
-        type=float,
-        default=0.005,
-        help="Truncated ellipsoid mesh with characteristic mesh size",
-    )
-    return parser
-
-
-if __name__ == "__main__":
-    args: argparse.Namespace = get_parser().parse_args()
-    print(args)
-
-    if len(sys.argv) > 1:
-        if (
-            args.create_mesh_and_fibers_from_folder is not None
-            and args.element_degree > 0
-        ):
-            biventricular_domain_from_mesh_and_fibers(
-                args.create_mesh_and_fibers_from_folder, args.element_degree
-            )
-        else:
-            ellipsoid_mesh(args.element_size, path=args.path_to_save)
