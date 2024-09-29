@@ -425,6 +425,55 @@ def compute_plot_displacements_p1_vs_p2_biventricular(
     # plt.show()
 
 
+def compute_statistics(
+    datasets: list[dict[str, np.ndarray]], point: str = "p0"
+) -> dict[str, np.ndarray]:
+    time = datasets[0]["time"]
+    number_of_element_per_dataset = datasets[0]["time"].shape[0]
+    number_of_datasets = len(datasets)
+    condensated_dataset_ux = np.zeros(
+        (number_of_element_per_dataset, number_of_datasets)
+    )
+    condensated_dataset_uy = np.zeros_like(condensated_dataset_ux)
+    condensated_dataset_uz = np.zeros_like(condensated_dataset_ux)
+    red_dataset_u = np.zeros((number_of_datasets,))
+
+    for i, dataset in enumerate(datasets):
+        condensated_dataset_ux[:, i] = dataset["displacement"][point]["ux"]
+        condensated_dataset_uy[:, i] = dataset["displacement"][point]["uy"]
+        condensated_dataset_uz[:, i] = dataset["displacement"][point]["uz"]
+
+    mean_ux = np.mean(condensated_dataset_ux, axis=1)
+    mean_uy = np.mean(condensated_dataset_uy, axis=1)
+    mean_uz = np.mean(condensated_dataset_uz, axis=1)
+
+    for i in range(number_of_datasets):
+        diff_to_mean_norm = np.sqrt(
+            np.abs(condensated_dataset_ux[:, i] - mean_ux) ** 2
+            + np.abs(condensated_dataset_uy[:, i] - mean_uy) ** 2
+            + np.abs(condensated_dataset_uz[:, i] - mean_uz) ** 2
+        )
+
+        mean_norm = np.sqrt(
+            np.abs(mean_ux) ** 2 + np.abs(mean_uy) ** 2 + np.abs(mean_uz) ** 2
+        )
+
+        red_dataset_u[i] = np.mean(diff_to_mean_norm / mean_norm, axis=0)
+
+    statistics_dataset = {
+        "time": time,
+        "mean_ux": mean_ux,
+        "mean_uy": mean_uy,
+        "mean_uz": mean_uz,
+        "std_ux": np.std(condensated_dataset_ux, axis=1),
+        "std_uy": np.std(condensated_dataset_uy, axis=1),
+        "std_uz": np.std(condensated_dataset_uz, axis=1),
+        "red_u": red_dataset_u,
+    }
+
+    return statistics_dataset
+
+
 def compute_plots_biventricular_blinded_step() -> None:
     """Computes the displacement curves for the biventricular blinded step"""
     compute_plot_displacements_p1_vs_p2_biventricular(
@@ -484,6 +533,26 @@ def compute_plots_monoventricular_nonblinded_step_1() -> None:
     )
 
 
+def compute_statistics_per_dataset(
+    labels: list[str], datasets: list[dict[str, np.ndarray]], header: str = ""
+) -> None:
+    if len(labels) != len(datasets):
+        raise ValueError("labels and datasets do not match in length")
+
+    print(header)
+    statistics_p0 = compute_statistics(datasets, point="p0")
+    statistics_p1 = compute_statistics(datasets, point="p1")
+
+    red_p0 = np.round(statistics_p0["red_u"], decimals=3)
+    red_p1 = np.round(statistics_p1["red_u"], decimals=3)
+
+    print(f"Team {'TEAM NAME':25s} - {'p0':4s}, {'p1':4s}")
+    for label, i in zip(labels, range(len(red_p0))):
+        print(f"Team {label:25s} - {red_p0[i]:4.3f}, {red_p1[i]:4.3f}")
+
+    print("-----------------------------------\n")
+
+
 def compute_plots_monoventricular_blinded() -> None:
     """Computes displacement curves for the monoventricular blinded cases A, B, C"""
 
@@ -504,6 +573,15 @@ def compute_plots_monoventricular_blinded() -> None:
         "./comparison_plots_p0_p1_step_2C_blinded.png",
         LABEL_NAMES,
         COLORS,
+    )
+    compute_statistics_per_dataset(
+        LABEL_NAMES, TEAMS_DATASETS_A, header="RED Computation, Case A"
+    )
+    compute_statistics_per_dataset(
+        LABEL_NAMES, TEAMS_DATASETS_B, header="RED Computation, Case B"
+    )
+    compute_statistics_per_dataset(
+        LABEL_NAMES, TEAMS_DATASETS_C, header="RED Computation, Case C"
     )
 
 
