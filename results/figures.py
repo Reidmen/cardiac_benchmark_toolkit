@@ -6,12 +6,17 @@ import seaborn as sns
 
 sns.set_theme()
 
+DATA_PATH = Path(__file__).parent / "data"
 
-def load_dataset_from_pickle(filename: str) -> dict[str, np.ndarray]:
-    if not Path(filename).exists():
+
+def load_dataset_from_pickle(filename: str | Path) -> dict[str, np.ndarray]:
+    if not isinstance(filename, Path):
+        filename = Path(filename)
+
+    if not filename.exists():
         raise FileNotFoundError(f"File {filename} not found")
 
-    with open(filename, "rb") as fl:
+    with open(filename.as_posix(), "rb") as fl:
         return pickle.load(fl)
 
 
@@ -23,10 +28,37 @@ LABEL_NAMES = [
     "CHimeRA",
     r"$\mathcal{C}$Heart",
     r"life$^{\mathbf{X}}$",
-    "SimVascular",
+    r"SimVascular $\mathbb{P}_1$",
+    r"SimVascular $\mathbb{P}_2$",
     "COMSOL",
 ]
+
+LABEL_NAMES_BIV = [
+    "CARPentry",
+    "Ambit",
+    "4C",
+    "Simula",
+    "CHimeRA",
+    r"$\mathcal{C}$Heart",
+    r"life$^{\mathbf{X}}$",
+    r"SimVascular $\mathbb{P}_1$",
+    "COMSOL",
+]
+
 COLORS = [
+    "tab:blue",
+    "tab:orange",
+    "tab:green",
+    "tab:red",
+    "tab:purple",
+    "tab:brown",
+    "tab:pink",
+    "tab:gray",
+    "tab:cyan",
+    "tab:olive",
+]
+
+COLORS_BIV = [
     "tab:blue",
     "tab:orange",
     "tab:green",
@@ -37,6 +69,7 @@ COLORS = [
     "tab:gray",
     "tab:olive",
 ]
+
 LABELS_P1 = [
     r"Simula-$\mathbb{P}_1$",
     r"CHimeRA-$\mathbb{P}_1$",
@@ -57,182 +90,212 @@ COLORS_P1_P2 = ["tab:red", "tab:purple", "tab:brown", "tab:pink", "tab:olive"]
 
 TEAMS_DATASETS_0A = [
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_carpentry.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_carpentry.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_ambit.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_ambit.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_4C.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_4C.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_simula.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_simula.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_chimera.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_chimera.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_cheart.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_cheart.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_lifex.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_lifex.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_simvascular.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_simvascular_p1p1.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0A_group_comsol.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_simvascular_p2.pickle"
+    ),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_nonblinded_step_0A_group_comsol.pickle"
     ),
 ]
 
 TEAMS_DATASET_0B = [
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_carpentry.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_carpentry.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_ambit.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_ambit.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_4C.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_4C.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_simula.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_simula.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_chimera.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_chimera.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_cheart.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_cheart.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_lifex.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_lifex.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_simvascular.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_simvascular_p1p1.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_0B_group_comsol.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_simvascular_p2.pickle"
+    ),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_nonblinded_step_0B_group_comsol.pickle"
     ),
 ]
 
 TEAMS_DATASETS_1 = [
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_carpentry.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_carpentry.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_ambit.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_ambit.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_4c.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_4c.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_simula.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_simula.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_chimera.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_chimera.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_cheart.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_cheart.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_lifex.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_lifex.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_simvascular.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_simvascular_p1p1.pickle"
     ),
     load_dataset_from_pickle(
-        "./data/monoventricular_nonblinded_step_1_group_comsol.pickle"
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_simvascular_p2.pickle"
+    ),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_nonblinded_step_1_group_comsol.pickle"
     ),
 ]
 
 TEAMS_DATASETS_A = [
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_carpentry.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_ambit.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_4c.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_simula.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_chimera.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_cheart.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_lifex.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_simvascular.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_A_group_comsol.pkl"),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_A_group_carpentry.pkl"
+    ),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_A_group_ambit.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_A_group_4c.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_A_group_simula.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_A_group_chimera.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_A_group_cheart.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_A_group_lifex.pkl"),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_A_group_simvascular_p1p1.pkl"
+    ),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_A_group_simvascular_p2.pkl"
+    ),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_A_group_comsol.pkl"),
 ]
 
 TEAMS_DATASETS_B = [
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_carpentry.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_ambit.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_4c.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_simula.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_chimera.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_cheart.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_lifex.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_simvascular.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_B_group_comsol.pkl"),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_B_group_carpentry.pkl"
+    ),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_B_group_ambit.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_B_group_4c.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_B_group_simula.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_B_group_chimera.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_B_group_cheart.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_B_group_lifex.pkl"),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_B_group_simvascular_p1p1.pkl"
+    ),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_B_group_simvascular_p2.pkl"
+    ),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_B_group_comsol.pkl"),
 ]
 TEAMS_DATASETS_C = [
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_carpentry.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_ambit.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_4c.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_simula.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_chimera.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_cheart.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_lifex.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_simvascular.pkl"),
-    load_dataset_from_pickle("./data/monoventricular_blinded_C_group_comsol.pkl"),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_C_group_carpentry.pkl"
+    ),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_C_group_ambit.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_C_group_4c.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_C_group_simula.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_C_group_chimera.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_C_group_cheart.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_C_group_lifex.pkl"),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_C_group_simvascular_p1p1.pkl"
+    ),
+    load_dataset_from_pickle(
+        DATA_PATH / "monoventricular_blinded_C_group_simvascular_p2.pkl"
+    ),
+    load_dataset_from_pickle(DATA_PATH / "monoventricular_blinded_C_group_comsol.pkl"),
 ]
 
 TEAMS_DATASETS_BIV_COARSE_P2 = [
-    load_dataset_from_pickle("./data/biventricular_coarse_group_carpentry.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_ambit.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_4c.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_simula.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_chimera.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_cheart.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_lifex.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_simvascular.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_comsol.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_carpentry.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_ambit.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_4c.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_simula.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_chimera.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_cheart.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_lifex.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_simvascular.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_comsol.pkl"),
 ]
 
 TEAMS_DATASETS_BIV_FINE_P2 = [
-    load_dataset_from_pickle("./data/biventricular_fine_group_carpentry.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_ambit.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_4c.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_simula.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_chimera.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_cheart.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_lifex.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_simvascular.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_comsol.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_carpentry.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_ambit.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_4c.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_simula.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_chimera.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_cheart.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_lifex.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_simvascular.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_comsol.pkl"),
 ]
 
 
 REDUCED_TEAMS_DATASETS_BIV_COARSE_P1 = [
-    load_dataset_from_pickle("./data/biventricular_coarse_group_simula_p1.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_chimera_p1.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_cheart_p1.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_lifex_p1.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_comsol_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_simula_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_chimera_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_cheart_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_lifex_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_comsol_p1.pkl"),
 ]
 REDUCED_TEAMS_DATASETS_BIV_COARSE_P2 = [
-    load_dataset_from_pickle("./data/biventricular_coarse_group_simula.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_chimera.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_cheart.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_lifex.pkl"),
-    load_dataset_from_pickle("./data/biventricular_coarse_group_comsol.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_simula.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_chimera.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_cheart.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_lifex.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_coarse_group_comsol.pkl"),
 ]
 
 REDUCED_TEAMS_DATASETS_BIV_FINE_P1 = [
-    load_dataset_from_pickle("./data/biventricular_fine_group_simula_p1.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_chimera_p1.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_cheart_p1.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_lifex_p1.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_comsol_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_simula_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_chimera_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_cheart_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_lifex_p1.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_comsol_p1.pkl"),
 ]
 REDUCED_TEAMS_DATASETS_BIV_FINE_P2 = [
-    load_dataset_from_pickle("./data/biventricular_fine_group_simula.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_chimera.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_cheart.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_lifex.pkl"),
-    load_dataset_from_pickle("./data/biventricular_fine_group_comsol.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_simula.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_chimera.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_cheart.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_lifex.pkl"),
+    load_dataset_from_pickle(DATA_PATH / "biventricular_fine_group_comsol.pkl"),
 ]
 
 
@@ -496,14 +559,14 @@ def compute_plots_biventricular_blinded_step() -> None:
     compute_plot_displacements_biventricular(
         TEAMS_DATASETS_BIV_COARSE_P2,
         "./comparison_plots_p0_p1_step_3_blinded_coarse.png",
-        LABEL_NAMES,
-        COLORS,
+        LABEL_NAMES_BIV,
+        COLORS_BIV,
     )
     compute_plot_displacements_biventricular(
         TEAMS_DATASETS_BIV_FINE_P2,
         "./comparison_plots_p0_p1_step_3_blinded_fine.png",
-        LABEL_NAMES,
-        COLORS,
+        LABEL_NAMES_BIV,
+        COLORS_BIV,
     )
 
 
