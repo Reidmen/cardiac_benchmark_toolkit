@@ -2,10 +2,11 @@
 ![Black](https://img.shields.io/badge/Style-Black-black)
 # Cardiac Benchmark Toolkit
 
-This repository contains basic scripts that allow you to reproduce the mesh
-as well as the fibers in the cardiac mechanics benchmark in dolfin (legacy). 
+This repository contains basic scripts that allow you to reproduce the mesh and fibers in the cardiac mechanics benchmark in dolfin.
 
-*For the [dolfinx](https://github.com/FEniCS/dolfinx) implementation of the tools, [check here](https://github.com/Reidmen/cardiac_benchmark_toolkitx)*
+Moreover, it provides the data to recreate all the comparison curves seen in the article. *[The results section](#Results)* shows how to reproduce the plots.
+
+*For the [dolfinx](https://github.com/FEniCS/dolfinx) implementation, [check here](https://github.com/Reidmen/cardiac_benchmark_toolkitx)*
 
 ![fiber_directions](figs/fiber_and_sheet_directions.png)
 
@@ -104,3 +105,14 @@ The command line above will create fiber, sheet and sheet-normal directions from
 
 Depicted below are fiber (left) and sheet (right) directions created from this procedure.
 ![fiber-sheet-biv](figs/comparison_fiber_and_sheet_lifex.png)
+
+
+## Results 
+
+In order to recreate the comparison curves seen in all blinded and non-blinded phases, run:
+
+```bash
+cd results && python3 results/figures.py 
+```
+
+The comparison results will be found in the `./results` directory.
